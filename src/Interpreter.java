@@ -1,11 +1,19 @@
+import java.io.*;
+
 public class Interpreter {
   private int currLine;
   private int currToken;
+  private File espFile;
 
-  public Interpreter() {
+  public Interpreter(File espFile) {
+    this.espFile = espFile;
     // Convert File into an array of line strings.
     // Convert line strings into tokens broken apart by spaces.
     // For each set of tokens, parseLine(line)
+  }
+
+  public void init() {
+    // Initializes the class
   }
 
   private void parseLine(String[] line) {
