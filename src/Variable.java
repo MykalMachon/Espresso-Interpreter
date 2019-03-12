@@ -15,7 +15,7 @@ public class Variable {
     if (this.initialized) {
       return this.value;
     } else {
-      throw new UndefinedVariableException();
+      throw new UndefinedVariableException("Variable has not yet been initialized!");
     }
   }
 }
