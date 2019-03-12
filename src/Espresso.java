@@ -11,6 +11,7 @@ public class Espresso {
         throw new FileNotFoundException("File doesnt exist");
       }
       Interpreter espInterpreter = new Interpreter(espFile);
+      espInterpreter.init();
     } catch (ArrayIndexOutOfBoundsException e) {
       System.out.println("\nThis is a Interpreter for Espresso!");
       System.out.println("You haven't passed a file in to be interpreted\n");
