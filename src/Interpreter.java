@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class Interpreter {
   private int currLineIndex;
@@ -37,20 +38,15 @@ public class Interpreter {
   }
 
   private void parseLine(String[] line) {
-    for (int i = 0; i < line.length; i++) {
-      String currToken = line[i];
-      if(i == 0){
-        if(currToken.equals("read")){
-          // This is a read statement
-          System.out.println("IS AN INPUT STATEMENT");
-        } else if (currToken.equals("print")){
-          // This is a print statement
-          System.out.println("IS AN OUTPUT STATEMENT");
-        } else {
-          // This is a assignment statement
-          System.out.println("IS AN ASSIGNMENT STATEMENT");
-        }
-      }
+    String initialToken = line[0];
+    if(initialToken.equals("read")){
+      this.getInput(Arrays.copyOfRange(line, 1, line.length));
+    } else if (initialToken.equals("print")){
+      // This is a print statement
+      System.out.println("IS AN OUTPUT STATEMENT");
+    } else {
+      // This is a assignment statement
+      System.out.println("IS AN ASSIGNMENT STATEMENT");
     }
   }
 
@@ -58,8 +54,11 @@ public class Interpreter {
     
   }
 
-  private void getInput(Variable val) {
-
+  private void getInput(String[] line) {
+    Scanner reader = new Scanner(System.in);
+    char varToBeAssigned = line[0].charAt(0);
+    System.out.print("Enter an integer number for variable " + varToBeAssigned + ": ");
+    this.variableTable[varToBeAssigned].setValue(reader.nextInt());
   }
 
   private void printOutput(String output) {
