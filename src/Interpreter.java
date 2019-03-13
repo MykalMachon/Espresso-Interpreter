@@ -55,6 +55,7 @@ public class Interpreter {
   }
 
   private void getInput(String[] line) {
+    // ! Should check for line length to ensure the line ends after reading the variable
     Scanner reader = new Scanner(System.in);
     char varToBeAssigned = line[0].charAt(0);
     System.out.print("Enter an integer number for variable " + varToBeAssigned + ": ");
