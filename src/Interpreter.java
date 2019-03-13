@@ -6,12 +6,16 @@ public class Interpreter {
   private int currLineIndex;
   private int currTokenIndex;
   private LinkedList<String> lines;
+  private Variable[] variableTable = new Variable[122];
 
   public Interpreter(File espFile) throws FileNotFoundException {
     // Reads in the file and initializes this.lines;
     this.lines = new LinkedList<String>();
     this.currLineIndex = 0;
     this.currTokenIndex = 0;
+    for(int i = 0; i < 'z'; i++){
+      this.variableTable[i] = new Variable();
+    }
     try {
       Scanner sc = new Scanner(espFile);
       while (sc.hasNextLine()) {
@@ -33,17 +37,36 @@ public class Interpreter {
   }
 
   private void parseLine(String[] line) {
-    // Read the tokens and execute what is instructed
+    for (int i = 0; i < line.length; i++) {
+      String currToken = line[i];
+      if(i == 0){
+        if(currToken.equals("read")){
+          // This is a read statement
+          System.out.println("IS AN INPUT STATEMENT");
+        } else if (currToken.equals("print")){
+          // This is a print statement
+          System.out.println("IS AN OUTPUT STATEMENT");
+        } else {
+          // This is a assignment statement
+          System.out.println("IS AN ASSIGNMENT STATEMENT");
+        }
+      }
+    }
   }
 
-  private void getInput(String variableValue) {
-    // Should return an instantiated variable with the value taken from the user
-    // Get an integer from the user
-    // Assign it to the variable name
-    // Return the variable
+  private void assignValue(Variable val){
+    
+  }
+
+  private void getInput(Variable val) {
+
   }
 
   private void printOutput(String output) {
-    // Should print out the output stirng
+
+  }
+
+  private int calcInfixExpressions(String[] exp){
+    return 1;
   }
 }
