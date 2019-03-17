@@ -158,8 +158,87 @@ public class Interpreter {
    * @return String[]: set of tokens in a postfix expression
    */
   private String[] convertInfixToPostfix(String[] infixExp) {
-    // TODO write the method
-    return new String[5];
+    System.out.println("Infix Expression is : " + String.join(" ", infixExp));
+    Stack<String> operatorStack = new Stack<String>();
+    String postfixString = "";
+    for (int i = 0; i < infixExp.length; i++) {
+      System.out.println("\nSTART OF LOOP \n");
+      System.out.println("This is the current token : " + infixExp[i]);
+      System.out.println("This is the operand stack");
+      System.out.println(operatorStack.toString());
+      System.out.println("This is the output string");
+      System.out.println(postfixString);
+      if (Character.isLetter(infixExp[i].charAt(0))) {
+        try {
+          postfixString += (this.variableTable[infixExp[i].charAt(0)].getValue() + " ");
+        } catch (UndefinedVariableException e) {
+          System.out.println("Runtime Error: The Variable \"" + infixExp[i] + "\" is not defined");
+        }
+      } else if (Character.isDigit(infixExp[i].charAt(0))) {
+        postfixString += (infixExp[i].charAt(0) + " ");
+      } else if (infixExp[i].charAt(0) == '(') {
+        operatorStack.push("(");
+      } else if (infixExp[i].charAt(0) == '+' || infixExp[i].charAt(0) == '-' || infixExp[i].charAt(0) == '*'
+          || infixExp[i].charAt(0) == '/') {
+        if (operatorStack.isEmpty()) {
+          operatorStack.push(infixExp[i]);
+        } else {
+          boolean greaterPrecFound = false;
+          while ((!operatorStack.isEmpty()) && (!operatorStack.peek().equals("(")) && !greaterPrecFound) {
+            if (checkPrecedence(operatorStack.peek(), infixExp[i])) {
+              postfixString += (operatorStack.pop() + " ");
+            } else {
+              greaterPrecFound = true;
+            }
+          }
+          operatorStack.push(infixExp[i]);
+        }
+      } else if (infixExp[i].charAt(0) == ')') {
+        while (!operatorStack.peek().equals("(")) {
+          postfixString += (operatorStack.pop() + " ");
+        }
+        // pop the final ( off of the stack
+        operatorStack.pop();
+      }
+      if (i + 1 == infixExp.length) {
+        while (!operatorStack.isEmpty()) {
+          postfixString += (operatorStack.pop() + " ");
+        }
+      }
+      System.out.println("\nEND OF LOOP \n");
+
+    }
+    String[] postfixTokens = postfixString.split("\\s+");
+    System.out.println("Postfix Expression is : " + postfixString);
+    return postfixTokens;
+  }
+
+  /**
+   * * checkPrecedence
+   * 
+   * Takes in two operators and determines if the current operator is of greater
+   * or equal precedence to the new operator
+   * 
+   * @param opOne string containing an operator
+   * @param opTwo string containing an operator
+   * @return boolean true if currOp >= newOp, false if currOp < newOp
+   */
+  private boolean checkPrecedence(String opOne, String opTwo) {
+    if (this.getPrecedence(opOne) >= this.getPrecedence(opTwo)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private int getPrecedence(String operator) {
+    if (operator.equals("*") || operator.equals("/")) {
+      return 2;
+    } else if (operator.equals("+") || operator.equals("-")) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   /**
