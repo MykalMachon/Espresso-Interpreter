@@ -126,7 +126,6 @@ public class Interpreter {
     char varToBeAssigned = line[0].charAt(0);
     if (line[1].charAt(0) == '=') {
       int variableValue = this.calcInfixExpression(Arrays.copyOfRange(line, 2, line.length));
-      System.out.println("variable value is : " + variableValue);
       this.variableTable[varToBeAssigned].setValue(variableValue);
     } else {
       // ! THROW SYNTAX ERROR: IMPROPER ASSIGNMENT
@@ -159,7 +158,6 @@ public class Interpreter {
    * @return String[]: set of tokens in a postfix expression
    */
   private String[] convertInfixToPostfix(String[] infixExp) {
-    System.out.println("Infix Expression is : " + String.join(" ", infixExp));
     Stack<String> operatorStack = new Stack<String>();
     String postfixString = "";
     for (int i = 0; i < infixExp.length; i++) {
@@ -203,7 +201,6 @@ public class Interpreter {
 
     }
     String[] postfixTokens = postfixString.split("\\s+");
-    System.out.println("Postfix Expression is : " + postfixString);
     return postfixTokens;
   }
 
@@ -245,8 +242,38 @@ public class Interpreter {
    * @return int: value of the solved postfix expression
    */
   private int calcPostfixExpression(String[] exp) {
-    // TODO write the method
-    return 1;
+    Stack<String> postfixStack = new Stack<String>();
+    int returnValue = 0;
+    for (int i = 0; i < exp.length; i++) {
+      if (Character.isDigit(exp[i].charAt(0))) {
+        postfixStack.push(exp[i]);
+      } else if (exp[i].equals("*") || exp[i].equals("/") || exp[i].equals("+") || exp[i].equals("-")) {
+        int rightHandSide = Integer.parseInt(postfixStack.pop());
+        int leftHandSide = Integer.parseInt(postfixStack.pop());
+        int resultInt;
+        if (exp[i].equals("*")) {
+          resultInt = leftHandSide * rightHandSide;
+        } else if (exp[i].equals("/")) {
+          resultInt = leftHandSide / rightHandSide;
+        } else if (exp[i].equals("+")) {
+          resultInt = leftHandSide + rightHandSide;
+        } else if (exp[i].equals("-")) {
+          resultInt = leftHandSide - rightHandSide;
+        } else {
+          // ! THIS IS AN ERROR
+          resultInt = 0;
+        }
+        postfixStack.push(Integer.toString(resultInt));
+      }
+      if (i + 1 == exp.length) {
+        if (postfixStack.size() == 1) {
+          returnValue = Integer.parseInt(postfixStack.pop());
+        } else {
+          // ERROR OF SOME SORT
+        }
+      }
+    }
+    return returnValue;
   }
 
 }
