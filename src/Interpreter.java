@@ -6,7 +6,7 @@ import java.util.Stack;
 
 public class Interpreter {
   private LinkedList<String> lines;
-  private Variable[] variableTable = new Variable[122];
+  private Variable[] variableTable = new Variable[123];
 
   /**
    * * Interpreter
@@ -24,7 +24,7 @@ public class Interpreter {
   public Interpreter(File espFile) throws FileNotFoundException {
     // Reads in the file and initializes this.lines;
     this.lines = new LinkedList<String>();
-    for (int i = 0; i < 'z'; i++) {
+    for (int i = 0; i <= 'z'; i++) {
       this.variableTable[i] = new Variable();
     }
     try {
@@ -71,7 +71,7 @@ public class Interpreter {
     if (initialToken.equals("read")) {
       this.getInput(Arrays.copyOfRange(line, 1, line.length));
     } else if (initialToken.equals("print")) {
-      this.printOutput(line);
+      this.printOutput(Arrays.copyOfRange(line, 1, line.length));
     } else {
       this.assignValue(line);
     }
@@ -126,6 +126,7 @@ public class Interpreter {
     char varToBeAssigned = line[0].charAt(0);
     if (line[1].charAt(0) == '=') {
       int variableValue = this.calcInfixExpression(Arrays.copyOfRange(line, 2, line.length));
+      System.out.println("variable value is : " + variableValue);
       this.variableTable[varToBeAssigned].setValue(variableValue);
     } else {
       // ! THROW SYNTAX ERROR: IMPROPER ASSIGNMENT
@@ -162,12 +163,6 @@ public class Interpreter {
     Stack<String> operatorStack = new Stack<String>();
     String postfixString = "";
     for (int i = 0; i < infixExp.length; i++) {
-      System.out.println("\nSTART OF LOOP \n");
-      System.out.println("This is the current token : " + infixExp[i]);
-      System.out.println("This is the operand stack");
-      System.out.println(operatorStack.toString());
-      System.out.println("This is the output string");
-      System.out.println(postfixString);
       if (Character.isLetter(infixExp[i].charAt(0))) {
         try {
           postfixString += (this.variableTable[infixExp[i].charAt(0)].getValue() + " ");
@@ -205,7 +200,6 @@ public class Interpreter {
           postfixString += (operatorStack.pop() + " ");
         }
       }
-      System.out.println("\nEND OF LOOP \n");
 
     }
     String[] postfixTokens = postfixString.split("\\s+");
