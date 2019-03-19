@@ -11,7 +11,7 @@ If using a text editor and the command line :
 1. Open a command line and navigate to the `./src` folder with this project in it.
 2. Compile all the java files in the folder using the command`javac ./\*.java`
 3. Drag in an espresso file (.esp) you wish to test the program with or use the included `test.esp` file
-4. Run the program using the command `java espresso <path_to_espresso_file>` where `<path_to_espresso_file>` is a path to a .esp file
+4. Run the program using the command `java Espresso <path_to_espresso_file>` where `<path_to_espresso_file>` is a path to a .esp file
 5. The interpreter should now write its output to the console!
 
 If using Eclipse Compiler :
