@@ -50,7 +50,7 @@ This is the primary class for this program and provides the majority of the func
 5. `getInput` simply takes a user-selected integer and assigns it to a variable kept in an array of variables
 6. Steps 2-5 are repeated until either 1) the file has been fully interpreted or 2) there is an error. Upon errors the program states the type of error and exits.
 
-#### UndefinedVariableExceptio.java
+#### UndefinedVariableException.java
 
 This is simply a custom exception to be used with the Variable.java class. It is thrown when the `getValue` method is called on a Variable object that has not yet been initialized with a value;
 
