@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.InputMismatchException;;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Arrays;
@@ -7,6 +8,9 @@ import java.util.Stack;
 public class Interpreter {
   private LinkedList<String> lines;
   private Variable[] variableTable = new Variable[123];
+
+  private String currLine;
+  private int currLineNum = 0;
 
   /**
    * * Interpreter
@@ -50,8 +54,9 @@ public class Interpreter {
    */
   public void init() {
     for (int i = 0; i < this.lines.size(); i++) {
-      String currLine = this.lines.get(i);
-      String[] currLineArr = currLine.split("\\s+");
+      this.currLineNum++;
+      this.currLine = this.lines.get(i);
+      String[] currLineArr = this.currLine.split("\\s+");
       this.parseLine(currLineArr);
     }
   }
@@ -90,10 +95,16 @@ public class Interpreter {
   private void getInput(String[] line) {
     // ! Should check for line length to ensure the line ends after reading the
     // variable
-    Scanner reader = new Scanner(System.in);
-    char varToBeAssigned = line[0].charAt(0);
-    System.out.print("Enter an integer number for variable " + varToBeAssigned + ": ");
-    this.variableTable[varToBeAssigned].setValue(reader.nextInt());
+    try {
+      Scanner reader = new Scanner(System.in);
+      char varToBeAssigned = line[0].charAt(0);
+      System.out.print("Enter an integer number for variable " + varToBeAssigned + ": ");
+      this.variableTable[varToBeAssigned].setValue(reader.nextInt());
+    } catch (InputMismatchException e) {
+      System.out.println("\nerror: The character entered was not an integer number. Run Espresso Again.\n");
+      System.exit(0);
+    }
+
   }
 
   /**
@@ -128,7 +139,9 @@ public class Interpreter {
       int variableValue = this.calcInfixExpression(Arrays.copyOfRange(line, 2, line.length));
       this.variableTable[varToBeAssigned].setValue(variableValue);
     } else {
-      // ! THROW SYNTAX ERROR: IMPROPER ASSIGNMENT
+      System.out.println("\nLine " + this.currLineNum + ". " + this.currLine);
+      System.out.println("Syntax error.\n");
+      System.exit(0);
     }
   }
 
@@ -160,46 +173,59 @@ public class Interpreter {
   private String[] convertInfixToPostfix(String[] infixExp) {
     Stack<String> operatorStack = new Stack<String>();
     String postfixString = "";
-    for (int i = 0; i < infixExp.length; i++) {
-      if (Character.isLetter(infixExp[i].charAt(0))) {
-        try {
-          postfixString += (this.variableTable[infixExp[i].charAt(0)].getValue() + " ");
-        } catch (UndefinedVariableException e) {
-          System.out.println("Runtime Error: The Variable \"" + infixExp[i] + "\" is not defined");
-        }
-      } else if (Character.isDigit(infixExp[i].charAt(0))) {
-        postfixString += (infixExp[i].charAt(0) + " ");
-      } else if (infixExp[i].charAt(0) == '(') {
-        operatorStack.push("(");
-      } else if (infixExp[i].charAt(0) == '+' || infixExp[i].charAt(0) == '-' || infixExp[i].charAt(0) == '*'
-          || infixExp[i].charAt(0) == '/') {
-        if (operatorStack.isEmpty()) {
-          operatorStack.push(infixExp[i]);
-        } else {
-          boolean greaterPrecFound = false;
-          while ((!operatorStack.isEmpty()) && (!operatorStack.peek().equals("(")) && !greaterPrecFound) {
-            if (checkPrecedence(operatorStack.peek(), infixExp[i])) {
-              postfixString += (operatorStack.pop() + " ");
-            } else {
-              greaterPrecFound = true;
-            }
+    try {
+      for (int i = 0; i < infixExp.length; i++) {
+        if (Character.isLetter(infixExp[i].charAt(0))) {
+          try {
+            postfixString += (this.variableTable[infixExp[i].charAt(0)].getValue() + " ");
+          } catch (UndefinedVariableException e) {
+            System.out.println("\nLine " + this.currLineNum + ". " + this.currLine);
+            System.out.println("error: variable " + infixExp[i] + " is not defined.\n");
+            System.exit(0);
           }
-          operatorStack.push(infixExp[i]);
+        } else if (Character.isDigit(infixExp[i].charAt(0))) {
+          postfixString += (infixExp[i].charAt(0) + " ");
+        } else if (infixExp[i].charAt(0) == '(') {
+          operatorStack.push("(");
+        } else if (infixExp[i].charAt(0) == '+' || infixExp[i].charAt(0) == '-' || infixExp[i].charAt(0) == '*'
+            || infixExp[i].charAt(0) == '/') {
+          if (operatorStack.isEmpty()) {
+            operatorStack.push(infixExp[i]);
+          } else {
+            boolean greaterPrecFound = false;
+            while ((!operatorStack.isEmpty()) && (!operatorStack.peek().equals("(")) && !greaterPrecFound) {
+              if (checkPrecedence(operatorStack.peek(), infixExp[i])) {
+                postfixString += (operatorStack.pop() + " ");
+              } else {
+                greaterPrecFound = true;
+              }
+            }
+            operatorStack.push(infixExp[i]);
+          }
+        } else if (infixExp[i].charAt(0) == ')') {
+          while (!operatorStack.peek().equals("(")) {
+            postfixString += (operatorStack.pop() + " ");
+          }
+          // pop the final ( off of the stack
+          operatorStack.pop();
+        } else {
+          System.out.println("\nLine " + this.currLineNum + ". " + this.currLine);
+          System.out.println("Syntax error.\n");
+          System.exit(0);
         }
-      } else if (infixExp[i].charAt(0) == ')') {
-        while (!operatorStack.peek().equals("(")) {
-          postfixString += (operatorStack.pop() + " ");
+        if (i + 1 == infixExp.length) {
+          while (!operatorStack.isEmpty()) {
+            postfixString += (operatorStack.pop() + " ");
+          }
         }
-        // pop the final ( off of the stack
-        operatorStack.pop();
-      }
-      if (i + 1 == infixExp.length) {
-        while (!operatorStack.isEmpty()) {
-          postfixString += (operatorStack.pop() + " ");
-        }
-      }
 
+      }
+    } catch (Exception e) {
+      System.out.println("\nLine " + this.currLineNum + ". " + this.currLine);
+      System.out.println("Syntax error.\n");
+      System.exit(0);
     }
+
     String[] postfixTokens = postfixString.split("\\s+");
     return postfixTokens;
   }
@@ -244,36 +270,44 @@ public class Interpreter {
   private int calcPostfixExpression(String[] exp) {
     Stack<String> postfixStack = new Stack<String>();
     int returnValue = 0;
-    for (int i = 0; i < exp.length; i++) {
-      if (Character.isDigit(exp[i].charAt(0))) {
-        postfixStack.push(exp[i]);
-      } else if (exp[i].equals("*") || exp[i].equals("/") || exp[i].equals("+") || exp[i].equals("-")) {
-        int rightHandSide = Integer.parseInt(postfixStack.pop());
-        int leftHandSide = Integer.parseInt(postfixStack.pop());
-        int resultInt;
-        if (exp[i].equals("*")) {
-          resultInt = leftHandSide * rightHandSide;
-        } else if (exp[i].equals("/")) {
-          resultInt = leftHandSide / rightHandSide;
-        } else if (exp[i].equals("+")) {
-          resultInt = leftHandSide + rightHandSide;
-        } else if (exp[i].equals("-")) {
-          resultInt = leftHandSide - rightHandSide;
-        } else {
-          // ! THIS IS AN ERROR
-          resultInt = 0;
+    try {
+      for (int i = 0; i < exp.length; i++) {
+        if (Character.isDigit(exp[i].charAt(0))) {
+          postfixStack.push(exp[i]);
+        } else if (exp[i].equals("*") || exp[i].equals("/") || exp[i].equals("+") || exp[i].equals("-")) {
+          int rightHandSide = Integer.parseInt(postfixStack.pop());
+          int leftHandSide = Integer.parseInt(postfixStack.pop());
+          int resultInt;
+          if (exp[i].equals("*")) {
+            resultInt = leftHandSide * rightHandSide;
+          } else if (exp[i].equals("/")) {
+            resultInt = leftHandSide / rightHandSide;
+          } else if (exp[i].equals("+")) {
+            resultInt = leftHandSide + rightHandSide;
+          } else if (exp[i].equals("-")) {
+            resultInt = leftHandSide - rightHandSide;
+          } else {
+            // ! THIS IS AN ERROR
+            resultInt = 0;
+          }
+          postfixStack.push(Integer.toString(resultInt));
         }
-        postfixStack.push(Integer.toString(resultInt));
-      }
-      if (i + 1 == exp.length) {
-        if (postfixStack.size() == 1) {
-          returnValue = Integer.parseInt(postfixStack.pop());
-        } else {
-          // ERROR OF SOME SORT
+        if (i + 1 == exp.length) {
+          if (postfixStack.size() == 1) {
+            returnValue = Integer.parseInt(postfixStack.pop());
+          } else {
+            // ERROR OF SOME SORT
+          }
         }
       }
+      return returnValue;
+    } catch (Exception e) {
+      System.out.println("\nLine " + this.currLineNum + ". " + this.currLine);
+      System.out.println("Syntax error.\n");
+      System.exit(0);
+      return 0;
     }
-    return returnValue;
+
   }
 
 }
